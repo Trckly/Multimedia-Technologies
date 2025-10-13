@@ -1,0 +1,14 @@
+﻿<Window x:Class="WpfApplication.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Animated Balls"
+        WindowState="Maximized"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        MouseLeftButtonDown="Window_MouseLeftButtonDown"
+        Loaded="Window_Loaded">
+    <Canvas Name="canvas" Background="Transparent">
+        <!-- Кульки будуть додані програмно -->
+    </Canvas>
+</Window>
