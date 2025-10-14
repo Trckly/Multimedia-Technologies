@@ -24,7 +24,7 @@ namespace WpfApplication
         {
             Canvas canvas = this.FindName("canvas") as Canvas;
 
-            // Створюємо 6 кульок з різними кольорами
+            // 6 кульок з різними кольорами
             Color[] colors = { Colors.Red, Colors.Blue, Colors.Green, Colors.Yellow, Colors.Magenta, Colors.Cyan };
             double[] radii = { 50, 60, 70, 55, 65, 58 };
             double[] speeds = { 0.007, 0.02, 0.012, 0.018, 0.03, 0.025 };

@@ -9,6 +9,5 @@
         MouseLeftButtonDown="Window_MouseLeftButtonDown"
         Loaded="Window_Loaded">
     <Canvas Name="canvas" Background="Transparent">
-        <!-- Кульки будуть додані програмно -->
     </Canvas>
 </Window>
