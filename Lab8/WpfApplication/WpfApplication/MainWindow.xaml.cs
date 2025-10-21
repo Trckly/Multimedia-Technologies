@@ -1,170 +1,105 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using System.Windows.Threading;
+using System.Windows.Controls;
+using System.Windows.Media.Animation;
 
 namespace WpfApplication
 {
     public partial class MainWindow : Window
     {
-        private DispatcherTimer animationTimer;
-        private List<Ball> balls = new List<Ball>();
-        private Ball selectedBall = null;
+        private readonly Dictionary<string, Storyboard> storyboards = new Dictionary<string, Storyboard>();
+        private readonly Dictionary<string, SolidColorBrush> originalColors = new Dictionary<string, SolidColorBrush>();
+        private readonly Dictionary<string, double> originalSizes = new Dictionary<string, double>();
+        private readonly Random random = new Random();
 
         public MainWindow()
         {
             InitializeComponent();
-        }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            Canvas canvas = this.FindName("canvas") as Canvas;
+            // Initialize storyboards by accessing BeginStoryboard.Storyboard
+            storyboards.Add("Ball1", ((BeginStoryboard)FindName("Ball1Storyboard")).Storyboard);
+            storyboards.Add("Ball2", ((BeginStoryboard)FindName("Ball2Storyboard")).Storyboard);
+            storyboards.Add("Ball3", ((BeginStoryboard)FindName("Ball3Storyboard")).Storyboard);
+            storyboards.Add("Ball4", ((BeginStoryboard)FindName("Ball4Storyboard")).Storyboard);
+            storyboards.Add("Ball5", ((BeginStoryboard)FindName("Ball5Storyboard")).Storyboard);
+            storyboards.Add("Ball6", ((BeginStoryboard)FindName("Ball6Storyboard")).Storyboard);
 
-            // 6 кульок з різними кольорами
-            Color[] colors = { Colors.Red, Colors.Blue, Colors.Green, Colors.Yellow, Colors.Magenta, Colors.Cyan };
-            double[] radii = { 50, 60, 70, 55, 65, 58 };
-            double[] speeds = { 0.007, 0.02, 0.012, 0.018, 0.03, 0.025 };
-            double[] orbitRadii = { 300, 100, 250, 320, 280, 120 };
+            // Store original colors and sizes
+            originalColors.Add("Ball1", new SolidColorBrush(Colors.Red));
+            originalColors.Add("Ball2", new SolidColorBrush(Colors.Blue));
+            originalColors.Add("Ball3", new SolidColorBrush(Colors.Green));
+            originalColors.Add("Ball4", new SolidColorBrush(Colors.Yellow));
+            originalColors.Add("Ball5", new SolidColorBrush(Colors.Magenta));
+            originalColors.Add("Ball6", new SolidColorBrush(Colors.Cyan));
 
-            for (int i = 0; i < 6; i++)
-            {
-                Ball ball = new Ball(25, colors[i], radii[i], speeds[i], orbitRadii[i], i);
-                balls.Add(ball);
-                canvas.Children.Add(ball.Ellipse);
-            }
-
-            // Налаштування таймера анімації
-            animationTimer = new DispatcherTimer();
-            animationTimer.Interval = TimeSpan.FromMilliseconds(16);
-            animationTimer.Tick += AnimationTimer_Tick;
-            animationTimer.Start();
-
-            // Обробники подій мишки
-            canvas.MouseDown += Canvas_MouseDown;
-            canvas.MouseUp += Canvas_MouseUp;
-            canvas.MouseMove += Canvas_MouseMove;
-        }
-
-        private void AnimationTimer_Tick(object sender, EventArgs e)
-        {
-            Canvas canvas = this.FindName("canvas") as Canvas;
-            double centerX = canvas.ActualWidth / 2;
-            double centerY = canvas.ActualHeight / 2;
-
-            foreach (Ball ball in balls)
-            {
-                if (!ball.IsPaused)
-                {
-                    // Рух по колоподібній траєкторії
-                    ball.Angle += ball.Speed;
-                    double x = centerX + ball.OrbitRadius * Math.Cos(ball.Angle);
-                    double y = centerY + ball.OrbitRadius * Math.Sin(ball.Angle);
-
-                    Canvas.SetLeft(ball.Ellipse, x - ball.Radius);
-                    Canvas.SetTop(ball.Ellipse, y - ball.Radius);
-                }
-            }
-        }
-
-        private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            Canvas canvas = this.FindName("canvas") as Canvas;
-            Point p = e.GetPosition(canvas);
-
-            foreach (Ball ball in balls)
-            {
-                double ballX = Canvas.GetLeft(ball.Ellipse) + ball.Radius;
-                double ballY = Canvas.GetTop(ball.Ellipse) + ball.Radius;
-                double distance = Math.Sqrt(Math.Pow(p.X - ballX, 2) + Math.Pow(p.Y - ballY, 2));
-
-                if (distance <= ball.Radius)
-                {
-                    selectedBall = ball;
-                    ball.IsPaused = !ball.IsPaused;
-
-                    // Зміна розміру при клацанні
-                    if (ball.IsPaused)
-                    {
-                        ball.Radius *= 1.3;
-                    }
-                    else
-                    {
-                        ball.Radius /= 1.3;
-                    }
-
-                    // Зміна кольору при клацанні
-                    Random rand = new Random();
-                    ball.SetColor(Color.FromRgb(
-                        (byte)rand.Next(100, 256),
-                        (byte)rand.Next(100, 256),
-                        (byte)rand.Next(100, 256)
-                    ));
-
-                    ball.Ellipse.Width = ball.Radius * 2;
-                    ball.Ellipse.Height = ball.Radius * 2;
-
-                    e.Handled = true;
-                    break;
-                }
-            }
-        }
-
-        private void Canvas_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            selectedBall = null;
-        }
-
-        private void Canvas_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (selectedBall != null)
-            {
-                Canvas canvas = this.FindName("canvas") as Canvas;
-                Point p = e.GetPosition(canvas);
-                Canvas.SetLeft(selectedBall.Ellipse, p.X - selectedBall.Radius);
-                Canvas.SetTop(selectedBall.Ellipse, p.Y - selectedBall.Radius);
-            }
+            originalSizes.Add("Ball1", 100);
+            originalSizes.Add("Ball2", 120);
+            originalSizes.Add("Ball3", 140);
+            originalSizes.Add("Ball4", 110);
+            originalSizes.Add("Ball5", 130);
+            originalSizes.Add("Ball6", 116);
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            this.DragMove();
+            DragMove();
         }
-    }
 
-    public class Ball
-    {
-        public Ellipse Ellipse { get; set; }
-        public double Radius { get; set; }
-        public double Angle { get; set; }
-        public double Speed { get; set; }
-        public double OrbitRadius { get; set; }
-        public bool IsPaused { get; set; }
-
-        public Ball(double radius, Color color, double orbitRadius, double speed, double initialOrbitRadius, int index)
+        private void Ellipse_MouseEnter(object sender, MouseEventArgs e)
         {
-            Radius = radius;
-            Speed = speed;
-            OrbitRadius = initialOrbitRadius;
-            IsPaused = false;
-            Angle = (Math.PI * 2 / 4) * index;
-
-            Ellipse = new Ellipse
+            if (sender is Ellipse ellipse)
             {
-                Width = radius * 2,
-                Height = radius * 2,
-                Fill = new SolidColorBrush(color),
-                Stroke = new SolidColorBrush(Colors.Black),
-                StrokeThickness = 2
-            };
+                string name = ellipse.Name;
+                if (storyboards.ContainsKey(name))
+                {
+                    storyboards[name].Pause();
+                }
+            }
         }
 
-        public void SetColor(Color color)
+        private void Ellipse_MouseLeave(object sender, MouseEventArgs e)
         {
-            Ellipse.Fill = new SolidColorBrush(color);
+            if (sender is Ellipse ellipse)
+            {
+                string name = ellipse.Name;
+                if (storyboards.ContainsKey(name))
+                {
+                    // Restore original color and size
+                    ellipse.Fill = originalColors[name];
+                    ellipse.Width = originalSizes[name];
+                    ellipse.Height = originalSizes[name];
+                    storyboards[name].Resume();
+                }
+            }
+        }
+
+        private void Ellipse_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Ellipse ellipse)
+            {
+                string name = ellipse.Name;
+                // Change to a random color
+                Color randomColor = Color.FromRgb(
+                    (byte)random.Next(256),
+                    (byte)random.Next(256),
+                    (byte)random.Next(256));
+                ellipse.Fill = new SolidColorBrush(randomColor);
+
+                // Increase size by 20%
+                double newSize = originalSizes[name] * 1.2;
+                ellipse.Width = newSize;
+                ellipse.Height = newSize;
+
+                // Center the ellipse to avoid shifting due to size change
+                double oldSize = originalSizes[name];
+                double deltaSize = (newSize - oldSize) / 2;
+                Canvas.SetLeft(ellipse, Canvas.GetLeft(ellipse) - deltaSize);
+                Canvas.SetTop(ellipse, Canvas.GetTop(ellipse) - deltaSize);
+            }
         }
     }
 }
