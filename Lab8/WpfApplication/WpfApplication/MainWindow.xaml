@@ -6,8 +6,271 @@
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
-        MouseLeftButtonDown="Window_MouseLeftButtonDown"
-        Loaded="Window_Loaded">
+        MouseLeftButtonDown="Window_MouseLeftButtonDown">
+
     <Canvas Name="canvas" Background="Transparent">
+        <!-- Кулька 1 - Червона (великі повільні кола) -->
+        <Ellipse x:Name="Ball1" 
+                 Width="100" Height="100"
+                 Fill="Red" 
+                 Stroke="Black" 
+                 StrokeThickness="2"
+                 Canvas.Left="960" 
+                 Canvas.Top="240"
+                 MouseEnter="Ellipse_MouseEnter"
+                 MouseLeave="Ellipse_MouseLeave"
+                 MouseLeftButtonDown="Ellipse_MouseLeftButtonDown">
+            <Ellipse.RenderTransform>
+                <TransformGroup>
+                    <TranslateTransform x:Name="Ball1Translate"/>
+                </TransformGroup>
+            </Ellipse.RenderTransform>
+            <Ellipse.Triggers>
+                <EventTrigger RoutedEvent="Ellipse.Loaded">
+                    <BeginStoryboard x:Name="Ball1Storyboard">
+                        <Storyboard x:Name="Ball1Animation" RepeatBehavior="Forever">
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Ball1Translate"
+                                                          Storyboard.TargetProperty="X"
+                                                          Duration="0:0:8">
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:0"/>
+                                <LinearDoubleKeyFrame Value="300" KeyTime="0:0:2"/>
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:4"/>
+                                <LinearDoubleKeyFrame Value="-300" KeyTime="0:0:6"/>
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:8"/>
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Ball1Translate"
+                                                          Storyboard.TargetProperty="Y"
+                                                          Duration="0:0:8">
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:0"/>
+                                <LinearDoubleKeyFrame Value="300" KeyTime="0:0:2"/>
+                                <LinearDoubleKeyFrame Value="600" KeyTime="0:0:4"/>
+                                <LinearDoubleKeyFrame Value="300" KeyTime="0:0:6"/>
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:8"/>
+                            </DoubleAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Ellipse.Triggers>
+        </Ellipse>
+
+        <!-- Кулька 2 - Синя (малі швидкі кола) -->
+        <Ellipse x:Name="Ball2" 
+                 Width="120" Height="120"
+                 Fill="Blue" 
+                 Stroke="Black" 
+                 StrokeThickness="2"
+                 Canvas.Left="560" 
+                 Canvas.Top="440"
+                 MouseEnter="Ellipse_MouseEnter"
+                 MouseLeave="Ellipse_MouseLeave"
+                 MouseLeftButtonDown="Ellipse_MouseLeftButtonDown">
+            <Ellipse.RenderTransform>
+                <TransformGroup>
+                    <TranslateTransform x:Name="Ball2Translate"/>
+                </TransformGroup>
+            </Ellipse.RenderTransform>
+            <Ellipse.Triggers>
+                <EventTrigger RoutedEvent="Ellipse.Loaded">
+                    <BeginStoryboard x:Name="Ball2Storyboard">
+                        <Storyboard x:Name="Ball2Animation" RepeatBehavior="Forever">
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Ball2Translate"
+                                                          Storyboard.TargetProperty="X"
+                                                          Duration="0:0:2">
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:0"/>
+                                <LinearDoubleKeyFrame Value="100" KeyTime="0:0:0.5"/>
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:1"/>
+                                <LinearDoubleKeyFrame Value="-100" KeyTime="0:0:1.5"/>
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:2"/>
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Ball2Translate"
+                                                          Storyboard.TargetProperty="Y"
+                                                          Duration="0:0:2">
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:0"/>
+                                <LinearDoubleKeyFrame Value="100" KeyTime="0:0:0.5"/>
+                                <LinearDoubleKeyFrame Value="200" KeyTime="0:0:1"/>
+                                <LinearDoubleKeyFrame Value="100" KeyTime="0:0:1.5"/>
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:2"/>
+                            </DoubleAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Ellipse.Triggers>
+        </Ellipse>
+
+        <!-- Кулька 3 - Зелена (середні кола) -->
+        <Ellipse x:Name="Ball3" 
+                 Width="140" Height="140"
+                 Fill="Green" 
+                 Stroke="Black" 
+                 StrokeThickness="2"
+                 Canvas.Left="910" 
+                 Canvas.Top="290"
+                 MouseEnter="Ellipse_MouseEnter"
+                 MouseLeave="Ellipse_MouseLeave"
+                 MouseLeftButtonDown="Ellipse_MouseLeftButtonDown">
+            <Ellipse.RenderTransform>
+                <TransformGroup>
+                    <TranslateTransform x:Name="Ball3Translate"/>
+                </TransformGroup>
+            </Ellipse.RenderTransform>
+            <Ellipse.Triggers>
+                <EventTrigger RoutedEvent="Ellipse.Loaded">
+                    <BeginStoryboard x:Name="Ball3Storyboard">
+                        <Storyboard x:Name="Ball3Animation" RepeatBehavior="Forever">
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Ball3Translate"
+                                                          Storyboard.TargetProperty="X"
+                                                          Duration="0:0:4">
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:0"/>
+                                <LinearDoubleKeyFrame Value="250" KeyTime="0:0:1"/>
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:2"/>
+                                <LinearDoubleKeyFrame Value="-250" KeyTime="0:0:3"/>
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:4"/>
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Ball3Translate"
+                                                          Storyboard.TargetProperty="Y"
+                                                          Duration="0:0:4">
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:0"/>
+                                <LinearDoubleKeyFrame Value="250" KeyTime="0:0:1"/>
+                                <LinearDoubleKeyFrame Value="500" KeyTime="0:0:2"/>
+                                <LinearDoubleKeyFrame Value="250" KeyTime="0:0:3"/>
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:4"/>
+                            </DoubleAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Ellipse.Triggers>
+        </Ellipse>
+
+        <!-- Кулька 4 - Жовта (великі швидкі кола) -->
+        <Ellipse x:Name="Ball4" 
+                 Width="110" Height="110"
+                 Fill="Yellow" 
+                 Stroke="Black" 
+                 StrokeThickness="2"
+                 Canvas.Left="980" 
+                 Canvas.Top="220"
+                 MouseEnter="Ellipse_MouseEnter"
+                 MouseLeave="Ellipse_MouseLeave"
+                 MouseLeftButtonDown="Ellipse_MouseLeftButtonDown">
+            <Ellipse.RenderTransform>
+                <TransformGroup>
+                    <TranslateTransform x:Name="Ball4Translate"/>
+                </TransformGroup>
+            </Ellipse.RenderTransform>
+            <Ellipse.Triggers>
+                <EventTrigger RoutedEvent="Ellipse.Loaded">
+                    <BeginStoryboard x:Name="Ball4Storyboard">
+                        <Storyboard x:Name="Ball4Animation" RepeatBehavior="Forever">
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Ball4Translate"
+                                                          Storyboard.TargetProperty="X"
+                                                          Duration="0:0:3">
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:0"/>
+                                <LinearDoubleKeyFrame Value="320" KeyTime="0:0:0.75"/>
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:1.5"/>
+                                <LinearDoubleKeyFrame Value="-320" KeyTime="0:0:2.25"/>
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:3"/>
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Ball4Translate"
+                                                          Storyboard.TargetProperty="Y"
+                                                          Duration="0:0:3">
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:0"/>
+                                <LinearDoubleKeyFrame Value="320" KeyTime="0:0:0.75"/>
+                                <LinearDoubleKeyFrame Value="640" KeyTime="0:0:1.5"/>
+                                <LinearDoubleKeyFrame Value="320" KeyTime="0:0:2.25"/>
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:3"/>
+                            </DoubleAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Ellipse.Triggers>
+        </Ellipse>
+
+        <!-- Кулька 5 - Пурпурна (середні швидкі кола) -->
+        <Ellipse x:Name="Ball5" 
+                 Width="130" Height="130"
+                 Fill="Magenta" 
+                 Stroke="Black" 
+                 StrokeThickness="2"
+                 Canvas.Left="940" 
+                 Canvas.Top="260"
+                 MouseEnter="Ellipse_MouseEnter"
+                 MouseLeave="Ellipse_MouseLeave"
+                 MouseLeftButtonDown="Ellipse_MouseLeftButtonDown">
+            <Ellipse.RenderTransform>
+                <TransformGroup>
+                    <TranslateTransform x:Name="Ball5Translate"/>
+                </TransformGroup>
+            </Ellipse.RenderTransform>
+            <Ellipse.Triggers>
+                <EventTrigger RoutedEvent="Ellipse.Loaded">
+                    <BeginStoryboard x:Name="Ball5Storyboard">
+                        <Storyboard x:Name="Ball5Animation" RepeatBehavior="Forever">
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Ball5Translate"
+                                                          Storyboard.TargetProperty="X"
+                                                          Duration="0:0:2.5">
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:0"/>
+                                <LinearDoubleKeyFrame Value="280" KeyTime="0:0:0.625"/>
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:1.25"/>
+                                <LinearDoubleKeyFrame Value="-280" KeyTime="0:0:1.875"/>
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:2.5"/>
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Ball5Translate"
+                                                          Storyboard.TargetProperty="Y"
+                                                          Duration="0:0:2.5">
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:0"/>
+                                <LinearDoubleKeyFrame Value="280" KeyTime="0:0:0.625"/>
+                                <LinearDoubleKeyFrame Value="560" KeyTime="0:0:1.25"/>
+                                <LinearDoubleKeyFrame Value="280" KeyTime="0:0:1.875"/>
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:2.5"/>
+                            </DoubleAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Ellipse.Triggers>
+        </Ellipse>
+
+        <!-- Кулька 6 - Блакитна (малі повільні кола) -->
+        <Ellipse x:Name="Ball6" 
+                 Width="116" Height="116"
+                 Fill="Cyan" 
+                 Stroke="Black" 
+                 StrokeThickness="2"
+                 Canvas.Left="542" 
+                 Canvas.Top="422"
+                 MouseEnter="Ellipse_MouseEnter"
+                 MouseLeave="Ellipse_MouseLeave"
+                 MouseLeftButtonDown="Ellipse_MouseLeftButtonDown">
+            <Ellipse.RenderTransform>
+                <TransformGroup>
+                    <TranslateTransform x:Name="Ball6Translate"/>
+                </TransformGroup>
+            </Ellipse.RenderTransform>
+            <Ellipse.Triggers>
+                <EventTrigger RoutedEvent="Ellipse.Loaded">
+                    <BeginStoryboard x:Name="Ball6Storyboard">
+                        <Storyboard x:Name="Ball6Animation" RepeatBehavior="Forever">
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Ball6Translate"
+                                                          Storyboard.TargetProperty="X"
+                                                          Duration="0:0:5">
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:0"/>
+                                <LinearDoubleKeyFrame Value="120" KeyTime="0:0:1.25"/>
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:2.5"/>
+                                <LinearDoubleKeyFrame Value="-120" KeyTime="0:0:3.75"/>
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:5"/>
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Ball6Translate"
+                                                          Storyboard.TargetProperty="Y"
+                                                          Duration="0:0:5">
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:0"/>
+                                <LinearDoubleKeyFrame Value="120" KeyTime="0:0:1.25"/>
+                                <LinearDoubleKeyFrame Value="240" KeyTime="0:0:2.5"/>
+                                <LinearDoubleKeyFrame Value="120" KeyTime="0:0:3.75"/>
+                                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:5"/>
+                            </DoubleAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Ellipse.Triggers>
+        </Ellipse>
     </Canvas>
 </Window>
