@@ -18,3 +18,5 @@ C:\Users\Danylo\Documents\University\Multimedia-Technologies\Lab8\WpfApplication
 C:\Users\Danylo\Documents\University\Multimedia-Technologies\Lab8\WpfApplication\WpfApplication\obj\Debug\net9.0-windows\WpfApplication.pdb
 C:\Users\Danylo\Documents\University\Multimedia-Technologies\Lab8\WpfApplication\WpfApplication\obj\Debug\net9.0-windows\WpfApplication.genruntimeconfig.cache
 C:\Users\Danylo\Documents\University\Multimedia-Technologies\Lab8\WpfApplication\WpfApplication\obj\Debug\net9.0-windows\ref\WpfApplication.dll
+C:\Users\Danylo\Documents\University\Multimedia-Technologies\Lab8\WpfApplication\WpfApplication\obj\Debug\net9.0-windows\GeneratedInternalTypeHelper.g.cs
+C:\Users\Danylo\Documents\University\Multimedia-Technologies\Lab8\WpfApplication\WpfApplication\obj\Debug\net9.0-windows\WpfApplication_MarkupCompile.lref
