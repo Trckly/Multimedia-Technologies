@@ -2,11 +2,13 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Animated 3D Balls"
-        WindowState="Maximized"
+        Width="1920"
+        Height="1280"
+        WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
         MouseLeftButtonDown="Window_MouseLeftButtonDown">
 
-    <Canvas x:Name="RootCanvas" Background="Transparent"/>
+    <Canvas x:Name="RootCanvas" Background="Transparent" ClipToBounds="False"/>
 </Window>

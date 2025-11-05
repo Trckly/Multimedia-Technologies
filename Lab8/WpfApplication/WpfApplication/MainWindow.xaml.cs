@@ -28,11 +28,11 @@ namespace Animated3DBalls
         {
             var cfg = new[]
             {
-                new BallConfig { Color = Colors.Red,     Radius = 150, OrbitRadius = 300, Speed = 8.0,  Center = new Point(960, 240) },
+                new BallConfig { Color = Colors.Red,     Radius = 150, OrbitRadius = 300, Speed = 8.0,  Center = new Point(960, 540) },
                 new BallConfig { Color = Colors.Blue,    Radius = 50,  OrbitRadius = 100, Speed = 3.0,  Center = new Point(560, 440) },
-                new BallConfig { Color = Colors.Green,   Radius = 125, OrbitRadius = 250, Speed = 5.0,  Center = new Point(910, 290) },
-                new BallConfig { Color = Colors.Yellow,  Radius = 160, OrbitRadius = 320, Speed = 4.0,  Center = new Point(980, 220) },
-                new BallConfig { Color = Colors.Magenta, Radius = 140, OrbitRadius = 280, Speed = 3.5,  Center = new Point(940, 260) },
+                new BallConfig { Color = Colors.Green,   Radius = 125, OrbitRadius = 250, Speed = 5.0,  Center = new Point(910, 590) },
+                new BallConfig { Color = Colors.Yellow,  Radius = 160, OrbitRadius = 320, Speed = 4.0,  Center = new Point(980, 620) },
+                new BallConfig { Color = Colors.Magenta, Radius = 140, OrbitRadius = 280, Speed = 3.5,  Center = new Point(940, 760) },
                 new BallConfig { Color = Colors.Cyan,    Radius = 60,  OrbitRadius = 120, Speed = 6.0,  Center = new Point(542, 422) }
             };
 
