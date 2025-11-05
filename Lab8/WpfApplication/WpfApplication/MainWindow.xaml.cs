@@ -1,251 +1,202 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Media3D;
+using System.Windows.Threading;
 
-namespace WpfApplication
+namespace Animated3DBalls
 {
     public partial class MainWindow : Window
     {
+        private readonly Random _rnd = new Random();
+        private readonly List<Ball> _balls = new();
         private bool _isPaused = false;
-        private readonly List<Viewport3D> _allViewports = new List<Viewport3D>();
-        private readonly Random _random = new Random();
 
         public MainWindow()
         {
             InitializeComponent();
-            Loaded += (s, e) =>
-            {
-                BuildAllSpheres();
-                CollectAllViewports();
-            };
+            Loaded += OnLoaded;
         }
 
-        private void CollectAllViewports()
-        {
-            // Find all Viewport3D elements and store them
-            _allViewports.Clear();
-            CollectViewportsRecursive(this);
-        }
+        private void OnLoaded(object sender, RoutedEventArgs e) => CreateBalls();
 
-        private void CollectViewportsRecursive(DependencyObject parent)
+        private void CreateBalls()
         {
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            var cfg = new[]
             {
-                var child = VisualTreeHelper.GetChild(parent, i);
-                if (child is Viewport3D viewport)
-                {
-                    _allViewports.Add(viewport);
-                }
-                CollectViewportsRecursive(child);
-            }
-        }
-
-        private void BuildAllSpheres()
-        {
-            // Define the visual radius for each ball (distinct from orbit radius in animations)
-            // Adjusted to be smaller than orbit for better visuals, but proportional to XAML comments
-            var ballRadii = new Dictionary<string, double>
-            {
-                { "Ball1Mesh", 150 },  // Red, orbit 300 → ball 150
-                { "Ball2Mesh", 50 },   // Blue, orbit 100 → ball 50
-                { "Ball3Mesh", 125 },  // Green, orbit 250 → ball 125
-                { "Ball4Mesh", 160 },  // Yellow, orbit 320 → ball 160
-                { "Ball5Mesh", 140 },  // Magenta, orbit 280 → ball 140
-                { "Ball6Mesh", 60 }    // Cyan, orbit 120 → ball 60
+                new BallConfig { Color = Colors.Red,     Radius = 150, OrbitRadius = 300, Speed = 8.0,  Center = new Point(960, 240) },
+                new BallConfig { Color = Colors.Blue,    Radius = 50,  OrbitRadius = 100, Speed = 3.0,  Center = new Point(560, 440) },
+                new BallConfig { Color = Colors.Green,   Radius = 125, OrbitRadius = 250, Speed = 5.0,  Center = new Point(910, 290) },
+                new BallConfig { Color = Colors.Yellow,  Radius = 160, OrbitRadius = 320, Speed = 4.0,  Center = new Point(980, 220) },
+                new BallConfig { Color = Colors.Magenta, Radius = 140, OrbitRadius = 280, Speed = 3.5,  Center = new Point(940, 260) },
+                new BallConfig { Color = Colors.Cyan,    Radius = 60,  OrbitRadius = 120, Speed = 6.0,  Center = new Point(542, 422) }
             };
 
-            // Build spheres for each named mesh
-            foreach (var kvp in ballRadii)
-            {
-                var mesh = this.FindName(kvp.Key) as MeshGeometry3D;
-                if (mesh != null)
-                {
-                    var sphere = CreateSphereMesh(kvp.Value, 48, 48);
-                    mesh.Positions = sphere.Positions;
-                    mesh.TriangleIndices = sphere.TriangleIndices;
-                    mesh.TextureCoordinates = sphere.TextureCoordinates;
-                }
-            }
+            foreach (var c in cfg)
+                _balls.Add(new Ball(c, RootCanvas, _rnd));
         }
 
-        #region Mouse handling
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            // Only drag if clicking on the Canvas background (not on a viewport)
-            if (e.OriginalSource is Canvas)
-            {
-                DragMove();
-            }
-        }
+            // drag window when clicking background
+            if (e.OriginalSource is Canvas) { DragMove(); return; }
 
-        private void Viewport_MouseEnter(object sender, MouseEventArgs e)
-        {
-            if (sender is Viewport3D viewport)
-            {
-                viewport.Cursor = Cursors.Hand;
-            }
-        }
-
-        private void Viewport_MouseLeave(object sender, MouseEventArgs e)
-        {
-            if (sender is Viewport3D viewport)
-            {
-                viewport.Cursor = Cursors.Arrow;
-            }
-        }
-
-        private void Viewport_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            e.Handled = true;
-            MessageBox.Show("Click detected! Sender: " + sender.GetType().Name + "\nPaused: " + _isPaused);
-
-            // Toggle pause state
             _isPaused = !_isPaused;
-
-            // Apply to ALL balls
-            foreach (var viewport in _allViewports)
+            foreach (var b in _balls)
             {
-                if (_isPaused)
-                    PauseBall(viewport);
-                else
-                    ResumeBall(viewport);
-
-                ChangeBallAppearance(viewport);
+                if (_isPaused) b.Pause(); else b.Resume();
+                b.RandomizeAppearance();
             }
         }
+    }
 
-        private void PauseBall(Viewport3D viewport)
+    // --------------------------------------------------------------
+    // Config
+    // --------------------------------------------------------------
+    internal class BallConfig
+    {
+        public Color Color { get; set; }
+        public double Radius { get; set; }
+        public double OrbitRadius { get; set; }
+        public double Speed { get; set; }
+        public Point Center { get; set; }
+    }
+
+    // --------------------------------------------------------------
+    // Ball
+    // --------------------------------------------------------------
+    internal class Ball
+    {
+        private readonly Viewport3D _vp;
+        private readonly TranslateTransform3D _translate;
+        private readonly ScaleTransform3D _scale;
+        private readonly DiffuseMaterial _material;
+        private readonly Storyboard _orbit;
+        private readonly GeometryModel3D _model;
+        private readonly Random _rnd;
+
+        public Ball(BallConfig cfg, Canvas canvas, Random rnd)
         {
-            // Pause all storyboards in the viewport
-            foreach (var trigger in viewport.Triggers.OfType<EventTrigger>())
+            _rnd = rnd;
+
+            // ---------- Viewport ----------
+            _vp = new Viewport3D
             {
-                foreach (var action in trigger.Actions.OfType<BeginStoryboard>())
-                {
-                    action.Storyboard?.Pause(viewport);
-                }
-            }
+                Width = cfg.Radius * 2 + 100,
+                Height = cfg.Radius * 2 + 100,
+                Cursor = Cursors.Hand
+            };
+            _vp.ClipToBounds = false;
+            Canvas.SetLeft(_vp, cfg.Center.X - _vp.Width / 2);
+            Canvas.SetTop(_vp, cfg.Center.Y - _vp.Height / 2);
+            canvas.Children.Add(_vp);
+
+            // ---------- Camera ----------
+            _vp.Camera = new PerspectiveCamera
+            {
+                Position = new Point3D(0, 0, cfg.Radius * 4),
+                LookDirection = new Vector3D(0, 0, -1),
+                UpDirection = new Vector3D(0, 1, 0),
+                FieldOfView = 45
+            };
+
+            // ---------- Lights ----------
+            var lights = new Model3DGroup();
+            lights.Children.Add(new DirectionalLight(Colors.White, new Vector3D(-1, -1, -1)));
+            lights.Children.Add(new DirectionalLight(Colors.White, new Vector3D(1, 1, -1)));
+
+            // ---------- Sphere ----------
+            var geometry = CreateSphereMesh(cfg.Radius);
+            _material = new DiffuseMaterial(new SolidColorBrush(cfg.Color));
+            _model = new GeometryModel3D(geometry, _material);
+
+            // ---------- Transforms ----------
+            _scale = new ScaleTransform3D(1, 1, 1);
+            _translate = new TranslateTransform3D();
+
+            var tg = new Transform3DGroup();
+            tg.Children.Add(_scale);
+            tg.Children.Add(_translate);
+            _model.Transform = tg;
+
+            // ---------- Visual ----------
+            var content = new Model3DGroup();
+            content.Children.Add(lights);
+            content.Children.Add(_model);
+            _vp.Children.Add(new ModelVisual3D { Content = content });
+
+            // ---------- Orbit ----------
+            _orbit = CreateOrbitStoryboard(cfg.OrbitRadius, cfg.Speed);
+            _orbit.RepeatBehavior = RepeatBehavior.Forever;
+
+            // Start animation after visual tree is ready
+            _vp.Loaded += (s, e) => _vp.Dispatcher.BeginInvoke(
+                new Action(() => _orbit.Begin(_vp, true)),
+                DispatcherPriority.Loaded);
         }
 
-        private void ResumeBall(Viewport3D viewport)
+        // --------------------------------------------------------------
+        // Circular orbit animation
+        // --------------------------------------------------------------
+        private Storyboard CreateOrbitStoryboard(double radius, double period)
         {
-            // Resume all storyboards in the viewport
-            foreach (var trigger in viewport.Triggers.OfType<EventTrigger>())
+            var sb = new Storyboard();
+            const int steps = 16;
+
+            var xAnim = new DoubleAnimationUsingKeyFrames { Duration = TimeSpan.FromSeconds(period) };
+            var yAnim = new DoubleAnimationUsingKeyFrames { Duration = TimeSpan.FromSeconds(period) };
+
+            for (int i = 0; i <= steps; i++)
             {
-                foreach (var action in trigger.Actions.OfType<BeginStoryboard>())
-                {
-                    action.Storyboard?.Resume(viewport);
-                }
+                double t = i / (double)steps;
+                double angle = t * 2 * Math.PI;
+                var time = TimeSpan.FromSeconds(t * period);
+
+                xAnim.KeyFrames.Add(new LinearDoubleKeyFrame(radius * Math.Cos(angle), time));
+                yAnim.KeyFrames.Add(new LinearDoubleKeyFrame(radius * Math.Sin(angle), time));
             }
+
+            // Animate TranslateTransform3D inside the 3D model hierarchy
+            Storyboard.SetTarget(xAnim, _vp);
+            Storyboard.SetTarget(yAnim, _vp);
+
+            var pathX = new PropertyPath("(Viewport3D.Children)[0].(ModelVisual3D.Content).(Model3DGroup.Children)[1].(GeometryModel3D.Transform).(Transform3DGroup.Children)[1].(TranslateTransform3D.OffsetX)");
+            var pathY = new PropertyPath("(Viewport3D.Children)[0].(ModelVisual3D.Content).(Model3DGroup.Children)[1].(GeometryModel3D.Transform).(Transform3DGroup.Children)[1].(TranslateTransform3D.OffsetY)");
+
+            Storyboard.SetTargetProperty(xAnim, pathX);
+            Storyboard.SetTargetProperty(yAnim, pathY);
+
+            sb.Children.Add(xAnim);
+            sb.Children.Add(yAnim);
+            return sb;
         }
 
-        private void ChangeBallAppearance(Viewport3D viewport)
-        {
-            // Find the GeometryModel3D and change its color
-            var model = FindVisualChild<GeometryModel3D>(viewport);
-            if (model?.Material is DiffuseMaterial material && material.Brush is SolidColorBrush brush)
-            {
-                // Generate random color
-                var newColor = Color.FromRgb(
-                    (byte)_random.Next(256),
-                    (byte)_random.Next(256),
-                    (byte)_random.Next(256)
-                );
-
-                // Animate color change
-                var colorAnimation = new ColorAnimation
-                {
-                    To = newColor,
-                    Duration = TimeSpan.FromMilliseconds(300),
-                    EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
-                };
-
-                brush.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
-            }
-
-            // Animate size change (scale)
-            var scaleTransform = FindOrCreateScaleTransform(model);
-            if (scaleTransform != null)
-            {
-                double newScale = 0.7 + _random.NextDouble() * 0.6; // Random scale between 0.7 and 1.3
-
-                var scaleAnimation = new DoubleAnimation
-                {
-                    To = newScale,
-                    Duration = TimeSpan.FromMilliseconds(300),
-                    EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
-                };
-
-                scaleTransform.BeginAnimation(ScaleTransform3D.ScaleXProperty, scaleAnimation);
-                scaleTransform.BeginAnimation(ScaleTransform3D.ScaleYProperty, scaleAnimation);
-                scaleTransform.BeginAnimation(ScaleTransform3D.ScaleZProperty, scaleAnimation);
-            }
-        }
-
-        private ScaleTransform3D? FindOrCreateScaleTransform(GeometryModel3D? model)
-        {
-            if (model == null) return null;
-
-            if (model.Transform is Transform3DGroup transformGroup)
-            {
-                var scaleTransform = transformGroup.Children.OfType<ScaleTransform3D>().FirstOrDefault();
-                if (scaleTransform != null) return scaleTransform;
-
-                scaleTransform = new ScaleTransform3D(1, 1, 1);
-                transformGroup.Children.Add(scaleTransform);
-                return scaleTransform;
-            }
-            else
-            {
-                var currentTransform = model.Transform ?? Transform3D.Identity;
-                var newGroup = new Transform3DGroup();
-                newGroup.Children.Add(currentTransform);
-                var scaleTransform = new ScaleTransform3D(1, 1, 1);
-                newGroup.Children.Add(scaleTransform);
-                model.Transform = newGroup;
-                return scaleTransform;
-            }
-        }
-
-        private T? FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
-        {
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
-            {
-                var child = VisualTreeHelper.GetChild(parent, i);
-                if (child is T typedChild)
-                    return typedChild;
-
-                var result = FindVisualChild<T>(child);
-                if (result != null)
-                    return result;
-            }
-            return null;
-        }
-        #endregion
-
-        #region Sphere generator (48×48 → smooth)
-        private MeshGeometry3D CreateSphereMesh(double radius, int thetaDiv, int phiDiv)
+        // --------------------------------------------------------------
+        // Smooth sphere mesh
+        // --------------------------------------------------------------
+        private static MeshGeometry3D CreateSphereMesh(double radius)
         {
             var pos = new Point3DCollection();
             var idx = new Int32Collection();
-            var uv  = new PointCollection();
+            var uv = new PointCollection();
+
+            const int thetaDiv = 48, phiDiv = 48;
 
             for (int phi = 0; phi <= phiDiv; phi++)
             {
                 double phiAngle = Math.PI * phi / phiDiv;
                 double y = radius * Math.Cos(phiAngle);
-                double rSlice = radius * Math.Sin(phiAngle);
+                double r = radius * Math.Sin(phiAngle);
 
                 for (int theta = 0; theta <= thetaDiv; theta++)
                 {
                     double thetaAngle = 2 * Math.PI * theta / thetaDiv;
-                    double x = rSlice * Math.Cos(thetaAngle);
-                    double z = rSlice * Math.Sin(thetaAngle);
+                    double x = r * Math.Cos(thetaAngle);
+                    double z = r * Math.Sin(thetaAngle);
 
                     pos.Add(new Point3D(x, y, z));
                     uv.Add(new Point((double)theta / thetaDiv, (double)phi / phiDiv));
@@ -276,26 +227,41 @@ namespace WpfApplication
                 TextureCoordinates = uv
             };
         }
-        #endregion
-    }
 
-    // ----------  Attached properties (only for XAML documentation) ----------
-    public static class Ball3D
-    {
-        public static readonly DependencyProperty RadiusProperty =
-            DependencyProperty.RegisterAttached("Radius", typeof(double), typeof(Ball3D), new UIPropertyMetadata(0.0));
+        // --------------------------------------------------------------
+        // Pause / Resume
+        // --------------------------------------------------------------
+        public void Pause() => _orbit.Pause(_vp);
+        public void Resume() => _orbit.Resume(_vp);
 
-        public static double GetRadius(DependencyObject obj) => (double)obj.GetValue(RadiusProperty);
-        public static void SetRadius(DependencyObject obj, double value) => obj.SetValue(RadiusProperty, value);
+        // --------------------------------------------------------------
+        // Random colour + scale animation
+        // --------------------------------------------------------------
+        public void RandomizeAppearance()
+        {
+            var col = Color.FromRgb(
+                (byte)_rnd.Next(256),
+                (byte)_rnd.Next(256),
+                (byte)_rnd.Next(256));
 
-        public static readonly DependencyProperty CenterXProperty =
-            DependencyProperty.RegisterAttached("CenterX", typeof(double), typeof(Ball3D), new UIPropertyMetadata(0.0));
-        public static readonly DependencyProperty CenterYProperty =
-            DependencyProperty.RegisterAttached("CenterY", typeof(double), typeof(Ball3D), new UIPropertyMetadata(0.0));
+            var ca = new ColorAnimation
+            {
+                To = col,
+                Duration = TimeSpan.FromMilliseconds(300),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
+            };
+            ((SolidColorBrush)_material.Brush).BeginAnimation(SolidColorBrush.ColorProperty, ca);
 
-        public static double GetCenterX(DependencyObject obj) => (double)obj.GetValue(CenterXProperty);
-        public static void SetCenterX(DependencyObject obj, double value) => obj.SetValue(CenterXProperty, value);
-        public static double GetCenterY(DependencyObject obj) => (double)obj.GetValue(CenterYProperty);
-        public static void SetCenterY(DependencyObject obj, double value) => obj.SetValue(CenterYProperty, value);
+            double target = 0.7 + _rnd.NextDouble() * 0.6;
+            var sa = new DoubleAnimation
+            {
+                To = target,
+                Duration = TimeSpan.FromMilliseconds(300),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
+            };
+            _scale.BeginAnimation(ScaleTransform3D.ScaleXProperty, sa);
+            _scale.BeginAnimation(ScaleTransform3D.ScaleYProperty, sa);
+            _scale.BeginAnimation(ScaleTransform3D.ScaleZProperty, sa);
+        }
     }
 }
